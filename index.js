@@ -1,9 +1,9 @@
 /**
  * Checkbox Plus
- * 
+ *
  * @author Mohammad Fares <faressoft.com@gmail.com>
  */
- 
+
 'use strict';
 
 var _ = require('lodash');
@@ -22,7 +22,7 @@ class CheckboxPlusPrompt extends Base {
 
   /**
    * Initialize the prompt
-   * 
+   *
    * @param  {Object} questions
    * @param  {Object} rl
    * @param  {Object} answers
@@ -69,7 +69,7 @@ class CheckboxPlusPrompt extends Base {
 
   /**
    * Start the Inquiry session
-   * 
+   *
    * @param  {Function} callback callback when prompt is done
    * @return {this}
    */
@@ -116,7 +116,7 @@ class CheckboxPlusPrompt extends Base {
       self.render();
 
     });
-    
+
     return this;
 
   }
@@ -129,12 +129,24 @@ class CheckboxPlusPrompt extends Base {
     var self = this;
     var sourcePromise = null;
 
-    // Remove spaces
-    this.rl.line = _.trim(this.rl.line);
+    // Hijack shift-A and shift-I for toggle all and inverse
+    var allKey = this.rl.line.endsWith('A');
+    var invKey = this.rl.line.endsWith('I');
+
+    if (allKey || invKey) {
+      this.rl.line = '';
+    } else {
+      // Remove spaces
+      this.rl.line = _.trim(this.rl.line).toLowerCase();
+    }
 
     // Same last search query that already loaded
     if (this.rl.line === this.lastQuery) {
+
+      allKey && this.onAllKey();
+      invKey && this.onInverseKey();
       return;
+
     }
 
     // If the search is enabled
@@ -148,8 +160,8 @@ class CheckboxPlusPrompt extends Base {
     this.lastSourcePromise = sourcePromise;
     this.searching = true;
 
-    sourcePromise.then(function(choices) {
-      
+    return sourcePromise.then(function(choices) {
+
       // Is not the last issued promise
       if (self.lastSourcePromise !== sourcePromise) {
         return;
@@ -185,20 +197,17 @@ class CheckboxPlusPrompt extends Base {
 
       // Reset the pointer to select the first choice
       self.pointer = 0;
-      self.render();
       self.default = null;
-      self.firstSourceLoading = false;
 
+      allKey && self.onAllKey();
+      invKey && self.onInverseKey();
 
     });
-
-    return sourcePromise;
-
   }
 
   /**
    * Render the prompt
-   * 
+   *
    * @param  {Object} error
    */
   render(error) {
@@ -225,8 +234,12 @@ class CheckboxPlusPrompt extends Base {
           '(Press ' +
           chalk.cyan.bold('<space>') +
           ' to select, ' +
-          'or type anything to filter the list)';
-        
+          chalk.cyan.bold('<A>') +
+          ' to toggle all, ' +
+          chalk.cyan.bold('<I>') +
+          ' to invert, ' +
+          'or type to filter)';
+
       } else {
 
         message +=
@@ -237,8 +250,9 @@ class CheckboxPlusPrompt extends Base {
           ' to toggle all, ' +
           chalk.cyan.bold('<i>') +
           ' to invert selection)';
-        
+
       }
+      this.firstSourceLoading = false;
 
     }
 
@@ -284,7 +298,7 @@ class CheckboxPlusPrompt extends Base {
   /**
    * A callback function for the event:
    * When the user press `Enter` key
-   * 
+   *
    * @param {Object} state
    */
   onEnd(state) {
@@ -303,7 +317,7 @@ class CheckboxPlusPrompt extends Base {
   /**
    * A callback function for the event:
    * When something wrong happen
-   * 
+   *
    * @param {Object} state
    */
   onError(state) {
@@ -312,7 +326,7 @@ class CheckboxPlusPrompt extends Base {
 
   /**
    * Get the current values of the selected choices
-   * 
+   *
    * @return {Array}
    */
   getCurrentValue() {
@@ -421,8 +435,10 @@ class CheckboxPlusPrompt extends Base {
    */
   onKeypress() {
 
-    this.executeSource();
-    this.render();
+    var promise = this.executeSource();
+    if (promise) {
+      promise.then(() => this.render());
+    }
 
   }
 
@@ -460,7 +476,7 @@ class CheckboxPlusPrompt extends Base {
 
   /**
    * Get the checkbox figure (sign)
-   * 
+   *
    * @param  {Boolean} checked
    * @return {String}
    */
@@ -472,7 +488,7 @@ class CheckboxPlusPrompt extends Base {
 
   /**
    * Render the checkbox choices
-   * 
+   *
    * @param  {Array}  choices
    * @param  {Number} pointer the position of the pointer
    * @return {String} rendered content
@@ -520,7 +536,6 @@ class CheckboxPlusPrompt extends Base {
       }
 
       output += '\n';
-
 
     });
 

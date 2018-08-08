@@ -5,12 +5,14 @@ A plugin for [Inquirer](https://github.com/SBoudrias/Inquirer.js), similar to th
 [![npm](https://img.shields.io/npm/v/inquirer-checkbox-plus-prompt.svg)](https://www.npmjs.com/package/inquirer-checkbox-plus-prompt)
 [![npm](https://img.shields.io/npm/l/inquirer-checkbox-plus-prompt.svg)](https://github.com/faressoft/inquirer-checkbox-plus-prompt/blob/master/LICENSE)
 
+:ledger: **This fork modifies the original search behavior** by hijacking **Shift-A** and **Shift-I** keypresses to trigger **"toggle all"** and **"inverse selection"** actions. This allows the user to filter down a long list using non-case-sensitive matching while also having the option to select all items.
+
 ![Demo](/demo.gif?raw=true)
 
 # Installation
 
 ```
-npm install -g inquirer-checkbox-plus-prompt
+npm install --save inquirer-checkbox-plus-prompt
 ```
 
 # Usage
@@ -44,7 +46,7 @@ Check [example.js](/example.js?raw=true) for a more advanced example.
 var inquirer = require('inquirer');
 var fuzzy = require('fuzzy');
 
-inquirer.registerPrompt('checkbox-plus', require('./index'));
+inquirer.registerPrompt('checkbox-plus', require('inquirer-checkbox-plus-prompt'));
 
 var colors = ['red', 'green', 'blue', 'yellow'];
 
@@ -61,22 +63,16 @@ inquirer.prompt([{
     input = input || '';
 
     return new Promise(function(resolve) {
-
       var fuzzyResult = fuzzy.filter(input, colors);
-
       var data = fuzzyResult.map(function(element) {
         return element.original;
       });
-
       resolve(data);
-      
     });
-
   }
-}]).then(function(answers) {
-
+}])
+.then(function(answers) {
   console.log(answers.colors);
-
 });
 ```
 
