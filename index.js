@@ -217,9 +217,21 @@ class CheckboxPlusPrompt extends Base {
     var bottomContent = '';
 
     // Answered
+    var summary;
     if (this.status === 'answered') {
 
-      message += chalk.cyan(this.selection.join(', '));
+      if (typeof this.opt.summarize === 'function') {
+
+        // Pass checked choices and get one-line summary
+        summary = this.opt.summarize(this.checkedChoices);
+
+      } else {
+
+        summary = chalk.cyan(this.selection.join(', '));
+      }
+      if (summary) {
+        message += summary;
+      }
       return this.screen.render(message, bottomContent);
 
     }
@@ -397,6 +409,8 @@ class CheckboxPlusPrompt extends Base {
    */
   onAllKey() {
 
+    var self = this;
+
     var shouldBeChecked = Boolean(
       this.choices.find(function(choice) {
         return choice.type !== 'separator' && !choice.checked;
@@ -405,7 +419,7 @@ class CheckboxPlusPrompt extends Base {
 
     this.choices.forEach(function(choice) {
       if (choice.type !== 'separator') {
-        choice.checked = shouldBeChecked;
+        self.toggleChoice(choice, shouldBeChecked);
       }
     });
 
@@ -419,9 +433,11 @@ class CheckboxPlusPrompt extends Base {
    */
   onInverseKey() {
 
+    var self = this;
+
     this.choices.forEach(function(choice) {
       if (choice.type !== 'separator') {
-        choice.checked = !choice.checked;
+        self.toggleChoice(choice, !choice.checked);
       }
     });
 
