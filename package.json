@@ -27,13 +27,17 @@
   ],
   "author": "Mohammad Fares <faressoft.com@gmail.com>",
   "license": "MIT",
+  "devDependencies": {
+    "fuzzy": "^0.1.3"
+  },
   "dependencies": {
+    "chalk": "^2.0.0",
     "cli-cursor": "^2.1.0",
     "figures": "^2.0.0",
     "inquirer": "^5.1.0",
     "lodash": "^4.17.5"
   },
-  "devDependencies": {
-    "fuzzy": "^0.1.3"
+  "peerDependencies": {
+    "inquirer": "^5.0.0 || ^6.0.0"
   }
 }

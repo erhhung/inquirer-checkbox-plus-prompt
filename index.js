@@ -153,7 +153,7 @@ class CheckboxPlusPrompt extends Base {
     if (this.opt.searchable) {
       sourcePromise = this.opt.source(this.answers, this.rl.line);
     } else {
-      sourcePromise = this.opt.source(this.answers, null);
+      sourcePromise = this.opt.source(this.answers, undefined);
     }
 
     this.lastQuery = this.rl.line;
@@ -242,37 +242,35 @@ class CheckboxPlusPrompt extends Base {
       // If the search is enabled
       if (this.opt.searchable) {
 
-        message +=
-          '(Press ' +
+        message += chalk.italic( chalk.dim(
+          '(' +
           chalk.cyan.bold('<space>') +
           ' to select, ' +
           chalk.cyan.bold('<A>') +
           ' to toggle all, ' +
           chalk.cyan.bold('<I>') +
-          ' to invert, ' +
-          'or type to filter)';
+          ' to invert; type to filter)'
+        ));
 
       } else {
 
-        message +=
-          '(Press ' +
+        message += chalk.italic( chalk.dim(
+          '(' +
           chalk.cyan.bold('<space>') +
           ' to select, ' +
           chalk.cyan.bold('<a>') +
           ' to toggle all, ' +
           chalk.cyan.bold('<i>') +
-          ' to invert selection)';
+          ' to invert)'
+        ));
 
       }
       this.firstSourceLoading = false;
 
-    }
+    } else if (this.opt.searchable) {
 
-    // If the search is enabled
-    if (this.opt.searchable) {
-
-      // Print the current search query
-      message += this.rl.line;
+      // Print current search query and block cursor
+      message += this.rl.line + chalk.dim('\u2588');
 
     }
 
@@ -343,6 +341,11 @@ class CheckboxPlusPrompt extends Base {
    */
   getCurrentValue() {
 
+    // Order answers according to source order
+    // no matter which order they were toggled
+    this.checkedChoices = _.filter(this.choices.choices, choice =>
+      _.find(this.checkedChoices, _.isEqual.bind(null, choice)));
+
     this.selection = _.map(this.checkedChoices, 'short');
     return _.map(this.checkedChoices, 'value');
 
@@ -394,12 +397,12 @@ class CheckboxPlusPrompt extends Base {
   onSpaceKey() {
 
     // When called no results
-    if (!this.choices.getChoice(this.pointer)) {
-      return;
-    }
+    var choice = this.choices.getChoice(this.pointer);
+    if (choice) {
 
-    this.toggleChoice(this.choices.getChoice(this.pointer));
-    this.render();
+      this.toggleChoice(choice);
+      this.render();
+    }
 
   }
 
@@ -543,7 +546,7 @@ class CheckboxPlusPrompt extends Base {
 
         output += chalk.cyan(figures.pointer);
         output += self.getCheckboxFigure(choice.checked) + ' ';
-        output += self.opt.highlight ? chalk.gray(choice.name) : choice.name;
+        output += self.opt.highlight ? chalk.cyan(choice.name) : choice.name;
 
       } else {
 
