@@ -107,11 +107,8 @@ class CheckboxPlusPrompt extends Base {
 
       }
 
-      if (self.rl.line) {
-        self.onKeypress();
-      }
-
       // Init the prompt
+      self.rl.clearLine();
       cliCursor.hide();
       self.render();
 
@@ -134,10 +131,19 @@ class CheckboxPlusPrompt extends Base {
     var invKey = this.rl.line.endsWith('I');
 
     if (allKey || invKey) {
+
       this.rl.line = '';
+      this.rl.clearLine();
+
     } else {
+
       // Remove spaces
-      this.rl.line = _.trim(this.rl.line).toLowerCase();
+      if (this.rl.line.endsWith(' ')) {
+
+        this.rl.line = this.rl.line.trimRight();
+        this.rl._deleteLeft();
+      }
+      this.rl.line = this.rl.line.toLowerCase();
     }
 
     // Same last search query that already loaded
@@ -268,6 +274,12 @@ class CheckboxPlusPrompt extends Base {
       this.firstSourceLoading = false;
 
     } else if (this.opt.searchable) {
+
+      if (this.rl.line.endsWith(' ')) {
+
+        this.rl.line = this.rl.line.trimRight();
+        this.rl._deleteLeft();
+      }
 
       // Print current search query and block cursor
       message += this.rl.line + chalk.dim('\u2588');
