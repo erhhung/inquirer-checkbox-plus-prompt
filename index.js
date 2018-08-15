@@ -108,7 +108,6 @@ class CheckboxPlusPrompt extends Base {
       }
 
       // Init the prompt
-      self.rl.clearLine();
       cliCursor.hide();
       self.render();
 
